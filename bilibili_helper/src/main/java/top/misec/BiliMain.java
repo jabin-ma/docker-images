@@ -19,15 +19,15 @@ public class BiliMain {
         //VersionInfo.printVersionInfo();
         //每日任务65经验
         bilibiliRuntime.runWithL(log -> {
-            if (!Boolean.TRUE.equals(ConfigLoader.helperConfig.getTaskConfig().getSkipDailyTask())) {
-                DailyTask dailyTask = new DailyTask();
-                dailyTask.doDailyTask(bilibiliRuntime);
-            } else {
-                log.info("已开启了跳过本日任务，（不会发起任何网络请求），如果需要取消跳过，请将skipDailyTask值改为false");
-                ServerPush.doServerPush();
-            }
+                    if (!Boolean.TRUE.equals(ConfigLoader.helperConfig.getTaskConfig().getSkipDailyTask())) {
+                        DailyTask dailyTask = new DailyTask();
+                        dailyTask.doDailyTask(bilibiliRuntime);
+                    } else {
+                        log.info("已开启了跳过本日任务，（不会发起任何网络请求），如果需要取消跳过，请将skipDailyTask值改为false");
+                        ServerPush.doServerPush();
+                    }
                     return null;
-        }
+                }
         );
     }
 }

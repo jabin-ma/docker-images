@@ -1,17 +1,16 @@
 package top.misec.task;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ArrayBlockingQueue;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import lombok.Data;
 import top.misec.api.ApiList;
 import top.misec.config.ConfigLoader;
 import top.misec.utils.HttpUtils;
+
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * GetVideoId .

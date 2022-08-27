@@ -1,11 +1,7 @@
 package top.misec.task;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.JsonObject;
-
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
@@ -13,6 +9,9 @@ import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
 import top.misec.utils.SleepTime;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
@@ -103,7 +102,7 @@ public class CoinAdd implements Task {
                 }
 
                 addCoinOperateCount++;
-                boolean flag = coinAdd(bvid, 1, ConfigLoader.helperConfig.getTaskConfig().getSelectLike(),log);
+                boolean flag = coinAdd(bvid, 1, ConfigLoader.helperConfig.getTaskConfig().getSelectLike(), log);
                 if (flag) {
                     needCoins--;
                     new SleepTime().sleepDefault();
@@ -140,7 +139,7 @@ public class CoinAdd implements Task {
                     + "&cross_domain=" + "true"
                     + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
 
-            new VideoWatch().watchVideo(bvid,log);
+            new VideoWatch().watchVideo(bvid, log);
             JsonObject jsonObject = HttpUtils.doPost(ApiList.COIN_ADD, requestBody, headers);
             if (jsonObject.get(STATUS_CODE_STR).getAsInt() == 0) {
                 log.pushln("为 " + videoTitle + " 投币成功");

@@ -38,13 +38,13 @@ public class DailyTask {
 
 
     public void doDailyTask(BilibiliRuntime bilibiliRuntime) {
-            bilibiliRuntime.runWithL(log -> {
-                try {
+        bilibiliRuntime.runWithL(log -> {
+            try {
                 for (Task task : dailyTasks) {
-                    log.pushln("%s",task.getName());
+                    log.pushln("%s", task.getName());
                     log.info("------%s开始------", task.getName());
                     try {
-                        if (!task.run(bilibiliRuntime)){
+                        if (!task.run(bilibiliRuntime)) {
                             log.info("------%s失败 结束运行------\n", task.getName());
                             break;
                         }
@@ -54,14 +54,14 @@ public class DailyTask {
                     log.info("------%s结束------\n", task.getName());
                     new SleepTime().sleepDefault();
                 }
-                    log.info("本日任务已全部执行完毕");
-                } catch (Exception e) {
-                    log.error("任务运行异常", e);
-                } finally {
-                    ServerPush.doServerPush();
-                }
-                return null;
-            });
+                log.info("本日任务已全部执行完毕");
+            } catch (Exception e) {
+                log.error("任务运行异常", e);
+            } finally {
+                ServerPush.doServerPush();
+            }
+            return null;
+        });
     }
 }
 

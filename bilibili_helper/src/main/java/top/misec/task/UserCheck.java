@@ -29,7 +29,7 @@ public class UserCheck implements Task {
                 //判断Cookies是否有效
                 if (userJson.get(STATUS_CODE_STR).getAsInt() == 0
                         && userJson.get("data").getAsJsonObject().get("isLogin").getAsBoolean()) {
-                    bilibiliRuntime.setUserInfo( new Gson().fromJson(userJson
+                    bilibiliRuntime.setUserInfo(new Gson().fromJson(userJson
                             .getAsJsonObject("data"), UserData.class));
                     log.info("Cookies有效，登录成功");
                 } else {
@@ -37,7 +37,7 @@ public class UserCheck implements Task {
                     log.pushln("Cookies可能失效了,请仔细检查配置中的Cookies是否有效");
                     return false;
                 }
-                log.pushln("用户名称:%s 硬币余额:%s",HelpUtil.userNameEncode(bilibiliRuntime.runWithU(UserData::getUname)), bilibiliRuntime.runWithU(UserData::getMoney));
+                log.pushln("用户名称:%s 硬币余额:%s", HelpUtil.userNameEncode(bilibiliRuntime.runWithU(UserData::getUname)), bilibiliRuntime.runWithU(UserData::getMoney));
             }
             return true;
         });

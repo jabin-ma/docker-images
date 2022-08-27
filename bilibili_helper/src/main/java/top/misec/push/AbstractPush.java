@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class AbstractPush implements Push, RetryListener {
 
-    private final Retryer<JsonObject> retryer;
     protected final RequestConfig requestConfig;
+    private final Retryer<JsonObject> retryer;
 
     public AbstractPush() {
 

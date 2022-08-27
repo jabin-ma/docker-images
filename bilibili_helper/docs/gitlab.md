@@ -70,7 +70,8 @@
 }
 ```
 
-~~**如果不知道自己的 UA 之类数据，以及看不懂每个值的含义，可以[点击进入配置自动生成页面](https://utils.misec.top/index) 此页面暂不支持生成 v2.0.0 的配置**~~
+~~**如果不知道自己的 UA 之类数据，以及看不懂每个值的含义，可以[点击进入配置自动生成页面](https://utils.misec.top/index)
+此页面暂不支持生成 v2.0.0 的配置**~~
 
 ![](images/gitlab/2.png)
 
@@ -89,7 +90,8 @@ include:
   - remote: 'https://github.com/Oreomeow/bili/raw/main/.gitlab-ci.yml'
 ```
 
-如果你希望自定义 CI/CD 流水线，可以将本仓库中 [.gitlab-ci.yml](https://github.com/Oreomeow/bili/blob/main/.gitlab-ci.yml) 文件内容复制覆盖粘贴到编辑器中，随后自定义。
+如果你希望自定义 CI/CD 流水线，可以将本仓库中 [.gitlab-ci.yml](https://github.com/Oreomeow/bili/blob/main/.gitlab-ci.yml)
+文件内容复制覆盖粘贴到编辑器中，随后自定义。
 
 确保编辑后的工作流显示 `此 GitLab CI 配置有效` ，随后点击页面下方 `提交更改` 。
 
@@ -113,4 +115,5 @@ include:
 
 ### 5. 添加多个账号
 
-在 `4. 配置定时运行` 的基础上，再新建一个流水线计划，在 `变量` 中，输入变量名称 `CONFIG` ，变量值参考 `config样例` 输入新账号的相应配置，保存即可。
+在 `4. 配置定时运行` 的基础上，再新建一个流水线计划，在 `变量` 中，输入变量名称 `CONFIG` ，变量值参考 `config样例`
+输入新账号的相应配置，保存即可。

@@ -25,7 +25,6 @@ public class ConfigLoader {
     }
 
 
-
     /**
      * 优先从jar包同级目录读取.
      */
@@ -38,7 +37,7 @@ public class ConfigLoader {
             log.info("未在 ：%s 目录读取到配置文件", filePath);
             return false;
         }
-        if (!validationConfig(log)){
+        if (!validationConfig(log)) {
             return false;
         }
         helperConfig.getBiliVerify().initCookiesMap();

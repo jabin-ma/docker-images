@@ -1,20 +1,19 @@
 package top.misec.task;
 
-import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
-
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-
 import com.google.gson.JsonObject;
-
 import lombok.Data;
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.GsonUtils;
 import top.misec.utils.HttpUtils;
+
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 /**
  * 漫画权益领取.
@@ -79,6 +78,7 @@ public class GetVipPrivilege implements Task {
             return true;
         });
     }
+
     @Override
     public String getName() {
         return "漫画权益领取";

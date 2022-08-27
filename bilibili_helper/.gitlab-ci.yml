@@ -27,9 +27,9 @@ stages:
 
 before_script:
   # CONFIG is necessary
-  - if [ -z "${CONFIG}" ]; then 
-      echo "Missing variable 'CONFIG'.";
-      exit 1;
+  - if [ -z "${CONFIG}" ]; then
+    echo "Missing variable 'CONFIG'.";
+    exit 1;
     fi
 
 run:
@@ -47,56 +47,56 @@ run:
     - locale-gen zh_CN.UTF-8
     # Get the latest version number if not specify VERSION, if get failed use latest
     - if [ -z "${VERSION}" ]; then
-        if wget -O "/tmp/version" "https://api.github.com/repos/${REPO_SOURCE}/releases/latest"; then
-          VERSION=`cat /tmp/version |  grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`;
-        else
-          VERSION="latest";
-        fi;
+      if wget -O "/tmp/version" "https://api.github.com/repos/${REPO_SOURCE}/releases/latest"; then
+      VERSION=`cat /tmp/version |  grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`;
+      else
+      VERSION="latest";
+      fi;
       fi
     - echo "Package ${PACK_NAME} Uses Version ${VERSION}, Source from https://github.com/${REPO_SOURCE}."
     # If possible, directly get the latest release package from GitHub
     - if [ ! "${USE_MAVEN}" = "TRUE" ] && [ ! "${VERSION}" = "latest" ]; then
-        mkdir -p "/tmp/release";
-        if wget -O "/tmp/release/${PACK_NAME}.zip" "https://github.com/${REPO_SOURCE}/releases/download/${VERSION}/${PACK_NAME}-${VERSION}.zip"; then
-          if unzip -o "/tmp/release/${PACK_NAME}.zip" -d "/tmp/release"; then
-            if [ ! -z "`ls /tmp/release/${PACK_NAME}-*.jar 2> /dev/null`" ]; then
-              mv -f /tmp/release/${PACK_NAME}-*.jar .;
-            fi;
-          fi;
-        fi;
+      mkdir -p "/tmp/release";
+      if wget -O "/tmp/release/${PACK_NAME}.zip" "https://github.com/${REPO_SOURCE}/releases/download/${VERSION}/${PACK_NAME}-${VERSION}.zip"; then
+      if unzip -o "/tmp/release/${PACK_NAME}.zip" -d "/tmp/release"; then
+      if [ ! -z "`ls /tmp/release/${PACK_NAME}-*.jar 2> /dev/null`" ]; then
+      mv -f /tmp/release/${PACK_NAME}-*.jar .;
+      fi;
+      fi;
+      fi;
       fi
     # Otherwise, pack the jar file using maven, if get upstream failed use cached
     - if [ -z "`ls ${PACK_NAME}-*.jar 2> /dev/null`" ]; then
-        apt-get install git -y;
-        if git clone https://github.com/${REPO_SOURCE} repo; then
-          rm -rf repo_backup;
-          cp -r repo repo_backup;
-        else
-          echo "Warning... Upstream Unavailable, Using Cached Repo or Jar...";
-          if [ -d "repo_backup" ]; then
-            cp -r repo_backup repo;
-          fi;
-        fi;
-        if [ -d "repo" ]; then
-          cd repo;
-          if [ ! -z "${BUILD_BRANCH}" ]; then
-            git checkout ${BUILD_BRANCH};
-          fi;
-          if [ ! "${VERSION}" = "latest" ]; then
-            git reset --hard ${VERSION};
-          fi;
-          apt-get install maven -y;
-          mvn -B package --file pom.xml;
-          mv -f target/${PACK_NAME}-*.jar ..;
-          cd ..;
-        else
-          if [ ! -z "`ls jar_backup/${PACK_NAME}-*.jar 2> /dev/null`" ]; then
-            cp jar_backup/${PACK_NAME}-*.jar .;
-          else
-            echo "Both Upstream and Cached Repo or Jar are Unavailable!";
-            exit 1;
-          fi;
-        fi;
+      apt-get install git -y;
+      if git clone https://github.com/${REPO_SOURCE} repo; then
+      rm -rf repo_backup;
+      cp -r repo repo_backup;
+      else
+      echo "Warning... Upstream Unavailable, Using Cached Repo or Jar...";
+      if [ -d "repo_backup" ]; then
+      cp -r repo_backup repo;
+      fi;
+      fi;
+      if [ -d "repo" ]; then
+      cd repo;
+      if [ ! -z "${BUILD_BRANCH}" ]; then
+      git checkout ${BUILD_BRANCH};
+      fi;
+      if [ ! "${VERSION}" = "latest" ]; then
+      git reset --hard ${VERSION};
+      fi;
+      apt-get install maven -y;
+      mvn -B package --file pom.xml;
+      mv -f target/${PACK_NAME}-*.jar ..;
+      cd ..;
+      else
+      if [ ! -z "`ls jar_backup/${PACK_NAME}-*.jar 2> /dev/null`" ]; then
+      cp jar_backup/${PACK_NAME}-*.jar .;
+      else
+      echo "Both Upstream and Cached Repo or Jar are Unavailable!";
+      exit 1;
+      fi;
+      fi;
       fi
     # Export the config from environment variable to file
     - echo ${CONFIG} > config.json

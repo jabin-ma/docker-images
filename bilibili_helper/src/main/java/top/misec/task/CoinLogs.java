@@ -35,7 +35,7 @@ public class CoinLogs implements Task {
                         expend += delta;
                     }
                 }
-                log.pushln("最近一周收入:%s 支出:%s",String.valueOf(income),String.valueOf(expend));
+                log.pushln("最近一周收入:%s 支出:%s", String.valueOf(income), String.valueOf(expend));
             }
             return true;
         });

@@ -45,11 +45,11 @@ public class Silver2Coin implements Task {
                 int responseCode = resultJson.get(STATUS_CODE_STR).getAsInt();
                 if (responseCode == 0) {
                     double coinMoneyAfterSilver2Coin = OftenApi.getCoinBalance();
-                    log.pushln("银瓜子兑换硬币成功 银瓜子余额:%s 硬币:%s",(silverNum - exchangeRate),coinMoneyAfterSilver2Coin);
+                    log.pushln("银瓜子兑换硬币成功 银瓜子余额:%s 硬币:%s", (silverNum - exchangeRate), coinMoneyAfterSilver2Coin);
 
                     //兑换银瓜子后，更新userInfo中的硬币值
                     bilibiliRuntime.runWithU(userinfo -> {
-                        if (userinfo ==null )
+                        if (userinfo == null)
                             //@TODO user NULL!!
                             log.warn("USER NULL!!");
                         else

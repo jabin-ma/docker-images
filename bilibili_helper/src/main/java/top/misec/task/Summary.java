@@ -2,11 +2,11 @@ package top.misec.task;
 
 import top.misec.utils.BilibiliRuntime;
 
-public class Summary implements Task{
+public class Summary implements Task {
 
     @Override
     public boolean run(BilibiliRuntime bilibiliRuntime) {
-        return bilibiliRuntime.runWithLU((userInfo, log) ->{
+        return bilibiliRuntime.runWithLU((userInfo, log) -> {
             if (userInfo == null) {
                 log.info("未请求到用户信息，暂无法计算等级相关数据");
                 return true;
@@ -25,10 +25,6 @@ public class Summary implements Task{
             return true;
         });
     }
-
-
-
-
 
 
     @Override

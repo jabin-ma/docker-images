@@ -1,16 +1,15 @@
 package top.misec.task;
 
 
-import java.util.Random;
-
 import com.google.gson.JsonObject;
-
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
 import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
+
+import java.util.Random;
 
 import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
@@ -27,13 +26,13 @@ public class VideoWatch implements Task {
             JsonObject dailyTaskStatus = getDailyTaskStatus(log);
             String bvid = bilibiliRuntime.getVideoId.getRegionRankingVideoBvid();
             if (!dailyTaskStatus.get("watch").getAsBoolean()) {
-                watchVideo(bvid,log);
+                watchVideo(bvid, log);
             } else {
                 log.pushln("本日观看视频任务已经完成了，不需要再观看视频了");
             }
 
             if (!dailyTaskStatus.get("share").getAsBoolean()) {
-                dailyAvShare(bvid,log);
+                dailyAvShare(bvid, log);
             } else {
                 log.pushln("本日分享视频任务已经完成了，不需要再分享视频了");
             }
@@ -63,7 +62,7 @@ public class VideoWatch implements Task {
     /**
      * @param bvid 要分享的视频bvid.
      */
-    public void dailyAvShare(String bvid , BilibiliRuntime.Log log) {
+    public void dailyAvShare(String bvid, BilibiliRuntime.Log log) {
         String requestBody = "aid=" + HelpUtil.bv2av(bvid) + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
         JsonObject result = HttpUtils.doPost(ApiList.AV_SHARE, requestBody);
         String videoTitle = OftenApi.getVideoTitle(bvid);
@@ -82,7 +81,7 @@ public class VideoWatch implements Task {
      * @value {"login":true,"watch":true,"coins":50,"share":true,"email":true,"tel":true,"safe_question":true,"identify_card":false}
      * @author @srcrs
      */
-    public JsonObject getDailyTaskStatus( BilibiliRuntime.Log log) {
+    public JsonObject getDailyTaskStatus(BilibiliRuntime.Log log) {
         JsonObject jsonObject = HttpUtils.doGet(ApiList.REWARD);
         int responseCode = jsonObject.get(STATUS_CODE_STR).getAsInt();
         if (responseCode == 0) {

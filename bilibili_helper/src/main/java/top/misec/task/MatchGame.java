@@ -1,20 +1,19 @@
 package top.misec.task;
 
 
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
 import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HttpUtils;
 import top.misec.utils.SleepTime;
+
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 赛事预测.
@@ -101,7 +100,7 @@ public class MatchGame implements Task {
                         }
                         log.info("拟预测的队伍是:%s,预测硬币数为:%s", teamName, coinNumber);
                         currentCoin -= coinNumber;
-                        doPrediction(contestId, questionId, teamId, coinNumber,log);
+                        doPrediction(contestId, questionId, teamId, coinNumber, log);
                         new SleepTime().sleepDefault();
                     }
                 }

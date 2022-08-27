@@ -1,11 +1,11 @@
 package top.misec.config;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * verify .

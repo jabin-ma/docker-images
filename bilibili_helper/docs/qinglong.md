@@ -43,13 +43,15 @@ ps: 只需要 `BILIBILI-HELPER-v2.x.x.jar` 和 `config.json` 这两个文件。
 
 ~~如果 `/ql/scripts` 目录已经存在 `config.json` 文件，可将 config.json 改名，在执行命令后指定对应的文件即可。~~
 
-~~例如将 `config.json` 改名为 `bilibili.json` ，对应的执行命令则是 `java -jar /ql/scripts/BILIBILI-HELPER-v2.0.9.jar /ql/scripts/bilibili.json`~~
+~~例如将 `config.json` 改名为 `bilibili.json`
+，对应的执行命令则是 `java -jar /ql/scripts/BILIBILI-HELPER-v2.0.9.jar /ql/scripts/bilibili.json`~~
 
 ### 日志查看
 
 **如果需要查看日志请在青龙管理面板-任务日志找到 java 目录查看执行日志**
 
-如果需要运行时查看日志请创建一个 `bili.sh` 脚本，放置到 `/ql/scripts` 目录，并将定时任务的执行命令修改为 `task bili.sh` 即可，请将 sh 文件中路径，文件名改为你实际的路径文件名（均为容器内的路径）。
+如果需要运行时查看日志请创建一个 `bili.sh` 脚本，放置到 `/ql/scripts` 目录，并将定时任务的执行命令修改为 `task bili.sh`
+即可，请将 sh 文件中路径，文件名改为你实际的路径文件名（均为容器内的路径）。
 
 ```sh
 #!/usr/bin/env bash

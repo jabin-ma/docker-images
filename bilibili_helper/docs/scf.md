@@ -10,7 +10,8 @@
 
 ### 1. 下载 release 包备用
 
-点击 [Release](https://github.com/JunzhouLiu/BILIBILI-HELPER-PRE/releases/)，下载名称为 `BILIBILI-HELPER-v2.x.x.zip` 的 zip 包到本地，解压后备用。
+点击 [Release](https://github.com/JunzhouLiu/BILIBILI-HELPER-PRE/releases/)，下载名称为 `BILIBILI-HELPER-v2.x.x.zip` 的
+zip 包到本地，解压后备用。
 
 ### 2. 配置云函数
 
@@ -49,7 +50,8 @@
 
 * **初始化时间** 建议不低于 20s
 
-* **执行超时时间：** 由于任务之间暂停时间较久，建议不低于 600s，如果调整了 `taskIntervalTime`，建议按照 `taskIntervalTime` 的 24 倍填写。
+* **执行超时时间：** 由于任务之间暂停时间较久，建议不低于 600s，如果调整了 `taskIntervalTime`，建议按照 `taskIntervalTime` 的
+  24 倍填写。
 
 环境变量：
 
@@ -106,7 +108,8 @@
 }
 ```
 
-~~**如果不知道自己的 UA 之类数据，以及看不懂每个值的含义，可以[点击进入配置自动生成页面](https://utils.misec.top/) 此页面暂不支持生成 v2.0.0 的配置**~~
+~~**如果不知道自己的 UA 之类数据，以及看不懂每个值的含义，可以[点击进入配置自动生成页面](https://utils.misec.top/)
+此页面暂不支持生成 v2.0.0 的配置**~~
 
 ### 触发器配置
 
@@ -134,7 +137,8 @@
 
 ### 测试
 
-**如果需要测试 jar 包，请点击部署后点击测试。下面提供了一个可用的测试事件模版，方便你在测试的时候变更配置，配置好这个 json，复制粘贴到测试事件中即可。**
+**如果需要测试 jar 包，请点击部署后点击测试。下面提供了一个可用的测试事件模版，方便你在测试的时候变更配置，配置好这个
+json，复制粘贴到测试事件中即可。**
 
 ```json
 {

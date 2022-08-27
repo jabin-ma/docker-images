@@ -1,18 +1,17 @@
 package top.misec.task;
 
-import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
-
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import com.google.gson.JsonObject;
-
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
 import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
+
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 /**
  * 给自己充电.
@@ -90,7 +89,7 @@ public class ChargeMe implements Task {
                         log.pushln("本次充值使用了: %s个B币券", couponBalance);
                         //获取充电留言token
                         String orderNo = dataJson.get("order_no").getAsString();
-                        chargeComments(orderNo,log);
+                        chargeComments(orderNo, log);
                     } else {
                         log.pushln("充电失败了啊 原因: %s", jsonObject);
                     }
