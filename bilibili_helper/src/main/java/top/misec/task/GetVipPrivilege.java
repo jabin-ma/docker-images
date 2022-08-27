@@ -1,7 +1,6 @@
 package top.misec.task;
 
-import static top.misec.task.TaskInfoHolder.STATUS_CODE_STR;
-import static top.misec.task.TaskInfoHolder.queryVipStatusType;
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -13,9 +12,9 @@ import com.google.gson.JsonObject;
 import lombok.Data;
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
+import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.GsonUtils;
 import top.misec.utils.HttpUtils;
-import top.misec.utils.Log;
 
 /**
  * 漫画权益领取.
@@ -25,7 +24,6 @@ import top.misec.utils.Log;
  */
 @Data
 public class GetVipPrivilege implements Task {
-    private Log log;
     /**
      * 权益号，由https://api.bilibili.com/x/vip/privilege/my.
      * 得到权益号数组，取值范围为数组中的整数.
@@ -34,53 +32,53 @@ public class GetVipPrivilege implements Task {
     private int reasonId = 1;
 
     @Override
-    public boolean run(Log logger) {
-        log = logger;
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
-        int day = cal.get(Calendar.DATE);
+    public boolean run(BilibiliRuntime bilibiliRuntime) {
+        return bilibiliRuntime.runWithL(log -> {
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
+            int day = cal.get(Calendar.DATE);
 
         /*
            根据userInfo.getVipStatus() ,如果是1 ，会员有效，0会员失效。
            @JunzhouLiu: fixed query_vipStatusType()现在可以查询会员状态，以及会员类型了 2020-10-15
          */
-        int vipType = queryVipStatusType();
+            int vipType = bilibiliRuntime.queryVipStatusType();
 
-        if (vipType == 0) {
-            log.info("非大会员，跳过领取大会员权益");
-            return true;
-        }
+            if (vipType == 0) {
+                log.info("非大会员，跳过领取大会员权益");
+                return true;
+            }
 
-        if (vipType == 1 && day == 1) {
-            log.info("开始领取大会员漫画权益");
-            Map<String, Object> map = new HashMap<>(1);
-            map.put("reason_id", reasonId);
-            JsonObject jsonObject = HttpUtils.doPost(ApiList.MANGA_GET_VIP_REWARD, GsonUtils.toJson(map));
-            if (jsonObject.get(STATUS_CODE_STR).getAsInt() == 0) {
+            if (vipType == 1 && day == 1) {
+                log.info("开始领取大会员漫画权益");
+                Map<String, Object> map = new HashMap<>(1);
+                map.put("reason_id", reasonId);
+                JsonObject jsonObject = HttpUtils.doPost(ApiList.MANGA_GET_VIP_REWARD, GsonUtils.toJson(map));
+                if (jsonObject.get(STATUS_CODE_STR).getAsInt() == 0) {
                 /*
                   @happy888888:好像也可以getAsString或,getAsShort
                   @JunzhouLiu:Int比较好判断
                  */
-                int num = jsonObject.get("data").getAsJsonObject().get("amount").getAsInt();
-                log.info("大会员成功领取%s张漫读劵", num);
+                    int num = jsonObject.get("data").getAsJsonObject().get("amount").getAsInt();
+                    log.info("大会员成功领取%s张漫读劵", num);
+                } else {
+                    log.info("大会员领取漫读劵失败，原因为:%s", jsonObject.get("msg").getAsString());
+                }
             } else {
-                log.info("大会员领取漫读劵失败，原因为:%s", jsonObject.get("msg").getAsString());
+                log.info("本日非领取大会员漫画执行日期");
             }
-        } else {
-            log.info("本日非领取大会员漫画执行日期");
-        }
 
-        if (day == 1 || day % 3 == 0) {
-            if (vipType == 2) {
-                log.info("开始领取年度大会员权益");
-                OftenApi.getVipPrivilege(1);
-                OftenApi.getVipPrivilege(2);
+            if (day == 1 || day % 3 == 0) {
+                if (vipType == 2) {
+                    log.info("开始领取年度大会员权益");
+                    OftenApi.getVipPrivilege(1);
+                    OftenApi.getVipPrivilege(2);
+                }
+            } else {
+                log.info("本日非领取年度大会员权益执行日期");
             }
-        } else {
-            log.info("本日非领取年度大会员权益执行日期");
-        }
-        return true;
+            return true;
+        });
     }
-
     @Override
     public String getName() {
         return "漫画权益领取";

@@ -1,7 +1,7 @@
 package top.misec.task;
 
 
-import top.misec.utils.Log;
+import top.misec.utils.BilibiliRuntime;
 
 /**
  * Task Interface.
@@ -14,7 +14,7 @@ public interface Task {
     /**
      * task接口.
      */
-    boolean run(Log log);
+    boolean run(BilibiliRuntime bilibiliRuntime);
 
 
     /**

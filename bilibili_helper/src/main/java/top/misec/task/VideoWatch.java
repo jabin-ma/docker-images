@@ -1,7 +1,5 @@
 package top.misec.task;
 
-import static top.misec.task.TaskInfoHolder.STATUS_CODE_STR;
-import static top.misec.task.TaskInfoHolder.getVideoId;
 
 import java.util.Random;
 
@@ -10,10 +8,11 @@ import com.google.gson.JsonObject;
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
+import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
-import top.misec.utils.Log;
-import top.misec.utils.PushData;
+
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 /**
  * 观看分享视频.
@@ -22,24 +21,24 @@ import top.misec.utils.PushData;
  * @since 2020-11-22 5:13
  */
 public class VideoWatch implements Task {
-    Log log;
     @Override
-    public boolean run(Log logger) {
-        log = logger;
-        JsonObject dailyTaskStatus = getDailyTaskStatus();
-        String bvid = getVideoId.getRegionRankingVideoBvid();
-        if (!dailyTaskStatus.get("watch").getAsBoolean()) {
-            watchVideo(bvid);
-        } else {
-            log.pushln("本日观看视频任务已经完成了，不需要再观看视频了");
-        }
+    public boolean run(BilibiliRuntime bilibiliRuntime) {
+        return bilibiliRuntime.runWithL(log -> {
+            JsonObject dailyTaskStatus = getDailyTaskStatus(log);
+            String bvid = bilibiliRuntime.getVideoId.getRegionRankingVideoBvid();
+            if (!dailyTaskStatus.get("watch").getAsBoolean()) {
+                watchVideo(bvid,log);
+            } else {
+                log.pushln("本日观看视频任务已经完成了，不需要再观看视频了");
+            }
 
-        if (!dailyTaskStatus.get("share").getAsBoolean()) {
-            dailyAvShare(bvid);
-        } else {
-            log.pushln("本日分享视频任务已经完成了，不需要再分享视频了");
-        }
-        return true;
+            if (!dailyTaskStatus.get("share").getAsBoolean()) {
+                dailyAvShare(bvid,log);
+            } else {
+                log.pushln("本日分享视频任务已经完成了，不需要再分享视频了");
+            }
+            return true;
+        });
     }
 
     @Override
@@ -47,7 +46,7 @@ public class VideoWatch implements Task {
         return "观看分享视频";
     }
 
-    public void watchVideo(String bvid) {
+    public void watchVideo(String bvid, BilibiliRuntime.Log log) {
         int playedTime = new Random().nextInt(90) + 1;
         String postBody = "bvid=" + bvid
                 + "&played_time=" + playedTime;
@@ -64,7 +63,7 @@ public class VideoWatch implements Task {
     /**
      * @param bvid 要分享的视频bvid.
      */
-    public void dailyAvShare(String bvid) {
+    public void dailyAvShare(String bvid , BilibiliRuntime.Log log) {
         String requestBody = "aid=" + HelpUtil.bv2av(bvid) + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
         JsonObject result = HttpUtils.doPost(ApiList.AV_SHARE, requestBody);
         String videoTitle = OftenApi.getVideoTitle(bvid);
@@ -83,7 +82,7 @@ public class VideoWatch implements Task {
      * @value {"login":true,"watch":true,"coins":50,"share":true,"email":true,"tel":true,"safe_question":true,"identify_card":false}
      * @author @srcrs
      */
-    public JsonObject getDailyTaskStatus() {
+    public JsonObject getDailyTaskStatus( BilibiliRuntime.Log log) {
         JsonObject jsonObject = HttpUtils.doGet(ApiList.REWARD);
         int responseCode = jsonObject.get(STATUS_CODE_STR).getAsInt();
         if (responseCode == 0) {

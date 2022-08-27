@@ -1,8 +1,6 @@
 package top.misec.task;
 
-import static top.misec.task.TaskInfoHolder.STATUS_CODE_STR;
-import static top.misec.task.TaskInfoHolder.queryVipStatusType;
-import static top.misec.task.TaskInfoHolder.userInfo;
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -12,9 +10,9 @@ import com.google.gson.JsonObject;
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
+import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
-import top.misec.utils.Log;
 
 /**
  * 给自己充电.
@@ -25,87 +23,89 @@ import top.misec.utils.Log;
  * @since 2020-11-22 5:43
  */
 public class ChargeMe implements Task {
-    Log log;
     @Override
-    public boolean run(Log logger) {
-        log = logger;
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
-        int day = cal.get(Calendar.DATE);
-        //被充电用户的userID
-        String userId = ConfigLoader.helperConfig.getTaskConfig().getChargeForLove();
+    public boolean run(BilibiliRuntime bilibiliRuntime) {
+        return bilibiliRuntime.runWithLU((userInfo, log) -> {
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
+            int day = cal.get(Calendar.DATE);
+            //被充电用户的userID
+            String userId = ConfigLoader.helperConfig.getTaskConfig().getChargeForLove();
 
-        String userName = OftenApi.queryUserNameByUid(userId);
+            String userName = OftenApi.queryUserNameByUid(userId);
 
-        //B币券余额
-        double couponBalance;
-        //大会员类型
-        int vipType = queryVipStatusType();
+            //B币券余额
+            double couponBalance;
+            //大会员类型
+            int vipType = bilibiliRuntime.queryVipStatusType();
 
-        if (vipType == 0 || vipType == 1) {
-            log.info("普通会员和月度大会员每月不赠送B币券，所以没法给自己充电哦");
-            return true;
-        }
+            if (vipType == 0 || vipType == 1) {
+                log.info("普通会员和月度大会员每月不赠送B币券，所以没法给自己充电哦");
+                return true;
+            }
 
-        if (!Boolean.TRUE.equals(ConfigLoader.helperConfig.getTaskConfig().getMonthEndAutoCharge())) {
-            log.info("未开启月底给自己充电功能");
-            return true;
-        }
+            if (!Boolean.TRUE.equals(ConfigLoader.helperConfig.getTaskConfig().getMonthEndAutoCharge())) {
+                log.info("未开启月底给自己充电功能");
+                return true;
+            }
 
-        if ("0".equals(userId) || "".equals(userId)) {
-            log.info("充电对象uid配置错误，请参考最新的文档");
-            return true;
-        }
+            if ("0".equals(userId) || "".equals(userId)) {
+                log.info("充电对象uid配置错误，请参考最新的文档");
+                return true;
+            }
 
-        if (day < ConfigLoader.helperConfig.getTaskConfig().getChargeDay()) {
-            log.info("今天是本月的第: %s天，还没到充电日子呢", day);
-            return true;
-        }
+            if (day < ConfigLoader.helperConfig.getTaskConfig().getChargeDay()) {
+                log.info("今天是本月的第: %s天，还没到充电日子呢", day);
+                return true;
+            }
 
 
-        log.pushln("月底自动充电对象是: %s", HelpUtil.userNameEncode(userName));
+            log.pushln("月底自动充电对象是: %s", HelpUtil.userNameEncode(userName));
 
-        if (userInfo != null) {
-            couponBalance = userInfo.getWallet().getCoupon_balance();
-        } else {
-            JsonObject queryJson = HttpUtils.doGet(ApiList.CHARGE_QUERY + "?mid=" + userId);
-            couponBalance = queryJson.getAsJsonObject("data").getAsJsonObject("bp_wallet").get("coupon_balance").getAsDouble();
-        }
+            if (userInfo != null) {
+                couponBalance = userInfo.getWallet().getCoupon_balance();
+            } else {
+                JsonObject queryJson = HttpUtils.doGet(ApiList.CHARGE_QUERY + "?mid=" + userId);
+                couponBalance = queryJson.getAsJsonObject("data").getAsJsonObject("bp_wallet").get("coupon_balance").getAsDouble();
+            }
 
         /*
           判断条件 是月底&&是年大会员&&b币券余额大于2&&配置项允许自动充电.
          */
-        if (day == ConfigLoader.helperConfig.getTaskConfig().getChargeDay() && couponBalance >= 2) {
-            String requestBody = "bp_num=" + couponBalance
-                    + "&is_bp_remains_prior=true"
-                    + "&up_mid=" + userId
-                    + "&otype=up"
-                    + "&oid=" + userId
-                    + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
+            if (day == ConfigLoader.helperConfig.getTaskConfig().getChargeDay() && couponBalance >= 2) {
+                String requestBody = "bp_num=" + couponBalance
+                        + "&is_bp_remains_prior=true"
+                        + "&up_mid=" + userId
+                        + "&otype=up"
+                        + "&oid=" + userId
+                        + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
 
-            JsonObject jsonObject = HttpUtils.doPost(ApiList.AUTO_CHARGE, requestBody);
+                JsonObject jsonObject = HttpUtils.doPost(ApiList.AUTO_CHARGE, requestBody);
 
-            int resultCode = jsonObject.get(STATUS_CODE_STR).getAsInt();
-            if (resultCode == 0) {
-                JsonObject dataJson = jsonObject.get("data").getAsJsonObject();
-                int statusCode = dataJson.get("status").getAsInt();
-                if (statusCode == 4) {
-                    log.pushln("月底了，自动充电成功啦，送的B币券没有浪费哦");
-                    log.pushln("本次充值使用了: %s个B币券", couponBalance);
-                    //获取充电留言token
-                    String orderNo = dataJson.get("order_no").getAsString();
-                    chargeComments(orderNo);
+                int resultCode = jsonObject.get(STATUS_CODE_STR).getAsInt();
+                if (resultCode == 0) {
+                    JsonObject dataJson = jsonObject.get("data").getAsJsonObject();
+                    int statusCode = dataJson.get("status").getAsInt();
+                    if (statusCode == 4) {
+                        log.pushln("月底了，自动充电成功啦，送的B币券没有浪费哦");
+                        log.pushln("本次充值使用了: %s个B币券", couponBalance);
+                        //获取充电留言token
+                        String orderNo = dataJson.get("order_no").getAsString();
+                        chargeComments(orderNo,log);
+                    } else {
+                        log.pushln("充电失败了啊 原因: %s", jsonObject);
+                    }
+
                 } else {
                     log.pushln("充电失败了啊 原因: %s", jsonObject);
                 }
-
-            } else {
-                log.pushln("充电失败了啊 原因: %s", jsonObject);
             }
-        }
-        return true;
+            return true;
+        });
+
+
     }
 
-    private void chargeComments(String token) {
+    private void chargeComments(String token, BilibiliRuntime.Log log) {
 
         String requestBody = "order_id=" + token
                 + "&message=" + "期待up主的新作品！"

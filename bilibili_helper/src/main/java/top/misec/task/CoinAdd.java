@@ -1,7 +1,5 @@
 package top.misec.task;
 
-import static top.misec.task.TaskInfoHolder.STATUS_CODE_STR;
-import static top.misec.task.TaskInfoHolder.getVideoId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +9,12 @@ import com.google.gson.JsonObject;
 import top.misec.api.ApiList;
 import top.misec.api.OftenApi;
 import top.misec.config.ConfigLoader;
+import top.misec.utils.BilibiliRuntime;
 import top.misec.utils.HelpUtil;
 import top.misec.utils.HttpUtils;
-import top.misec.utils.Log;
 import top.misec.utils.SleepTime;
+
+import static top.misec.utils.BilibiliRuntime.STATUS_CODE_STR;
 
 /**
  * 投币任务.
@@ -24,7 +24,6 @@ import top.misec.utils.SleepTime;
  */
 @SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class CoinAdd implements Task {
-     Log log;
     /**
      * 检查是否投币.
      *
@@ -40,82 +39,83 @@ public class CoinAdd implements Task {
     }
 
     @Override
-    public boolean run(Log logger) {
-        log = logger;
-        //投币最多操作数 解决csrf校验失败时死循环的问题
-        int addCoinOperateCount = 0;
-        //安全检查，最多投币数
-        final int maxNumberOfCoins = 5;
-        //获取自定义配置投币数 配置写在src/main/resources/taskConfig.json中
-        int setCoin = ConfigLoader.helperConfig.getTaskConfig().getNumberOfCoins();
-        // 预留硬币数
-        int reserveCoins = ConfigLoader.helperConfig.getTaskConfig().getReserveCoins();
+    public boolean run(BilibiliRuntime bilibiliRuntime) {
+        return bilibiliRuntime.runWithL(log -> {
+            //投币最多操作数 解决csrf校验失败时死循环的问题
+            int addCoinOperateCount = 0;
+            //安全检查，最多投币数
+            final int maxNumberOfCoins = 5;
+            //获取自定义配置投币数 配置写在src/main/resources/taskConfig.json中
+            int setCoin = ConfigLoader.helperConfig.getTaskConfig().getNumberOfCoins();
+            // 预留硬币数
+            int reserveCoins = ConfigLoader.helperConfig.getTaskConfig().getReserveCoins();
 
-        //已投的硬币
-        int useCoin = TaskInfoHolder.expConfirm();
-        //投币策略
-        int coinAddPriority = ConfigLoader.helperConfig.getTaskConfig().getCoinAddPriority();
+            //已投的硬币
+            int useCoin = bilibiliRuntime.expConfirm();
+            //投币策略
+            int coinAddPriority = ConfigLoader.helperConfig.getTaskConfig().getCoinAddPriority();
 
-        if (setCoin > maxNumberOfCoins) {
-            log.pushln("自定义投币数为: %s枚,为保护你的资产，自定义投币数重置为: " + maxNumberOfCoins + "枚", setCoin);
-            setCoin = maxNumberOfCoins;
-        }
-
-        log.pushln("自定义投币数为: %s枚,程序执行前已投: %s枚", setCoin, useCoin);
-
-        //调整投币数 设置投币数-已经投过的硬币数
-        int needCoins = setCoin - useCoin;
-
-        //投币前硬币余额
-        Double beforeAddCoinBalance = OftenApi.getCoinBalance();
-        int coinBalance = (int) Math.floor(beforeAddCoinBalance);
-
-
-        if (needCoins <= 0) {
-            log.pushln("已完成设定的投币任务，今日无需再投币了");
-            return true;
-        } else {
-            log.pushln("投币数调整为: %s枚", needCoins);
-            //投币数大于余额时，按余额投
-            if (needCoins > coinBalance) {
-                log.pushln("完成今日设定投币任务还需要投: %s枚硬币，但是余额只有: %s", needCoins, beforeAddCoinBalance);
-                log.pushln("投币数调整为: %s", coinBalance);
-                needCoins = coinBalance;
+            if (setCoin > maxNumberOfCoins) {
+                log.pushln("自定义投币数为: %s枚,为保护你的资产，自定义投币数重置为: " + maxNumberOfCoins + "枚", setCoin);
+                setCoin = maxNumberOfCoins;
             }
-        }
 
-        if (coinBalance < reserveCoins) {
-            log.pushln("剩余硬币数为%s,低于预留硬币数%s,今日不再投币", beforeAddCoinBalance, reserveCoins);
-            log.info("tips: 当硬币余额少于你配置的预留硬币数时，则会暂停当日投币任务");
-            return true;
-        }
+            log.pushln("自定义投币数为: %s枚,程序执行前已投: %s枚", setCoin, useCoin);
 
-        log.pushln("投币前余额为 : %s", beforeAddCoinBalance);
-        /*
-         * 请勿修改 max_numberOfCoins 这里多判断一次保证投币数超过5时 不执行投币操作.
-         * 最后一道安全判断，保证即使前面的判断逻辑错了，也不至于发生投币事故.
-         */
-        while (needCoins > 0 && needCoins <= maxNumberOfCoins) {
-            String bvid;
-            if (coinAddPriority == 1 && addCoinOperateCount < 7) {
-                bvid = getVideoId.getFollowUpRandomVideoBvid();
+            //调整投币数 设置投币数-已经投过的硬币数
+            int needCoins = setCoin - useCoin;
+
+            //投币前硬币余额
+            Double beforeAddCoinBalance = OftenApi.getCoinBalance();
+            int coinBalance = (int) Math.floor(beforeAddCoinBalance);
+
+
+            if (needCoins <= 0) {
+                log.pushln("已完成设定的投币任务，今日无需再投币了");
+                return true;
             } else {
-                bvid = getVideoId.getRegionRankingVideoBvid();
+                log.pushln("投币数调整为: %s枚", needCoins);
+                //投币数大于余额时，按余额投
+                if (needCoins > coinBalance) {
+                    log.pushln("完成今日设定投币任务还需要投: %s枚硬币，但是余额只有: %s", needCoins, beforeAddCoinBalance);
+                    log.pushln("投币数调整为: %s", coinBalance);
+                    needCoins = coinBalance;
+                }
             }
 
-            addCoinOperateCount++;
-            boolean flag = coinAdd(bvid, 1, ConfigLoader.helperConfig.getTaskConfig().getSelectLike());
-            if (flag) {
-                needCoins--;
-                new SleepTime().sleepDefault();
+            if (coinBalance < reserveCoins) {
+                log.pushln("剩余硬币数为%s,低于预留硬币数%s,今日不再投币", beforeAddCoinBalance, reserveCoins);
+                log.info("tips: 当硬币余额少于你配置的预留硬币数时，则会暂停当日投币任务");
+                return true;
             }
-            if (addCoinOperateCount > 15) {
-                log.pushln("尝试投币/投币失败次数太多");
-                break;
+
+            log.pushln("投币前余额为 : %s", beforeAddCoinBalance);
+            /*
+             * 请勿修改 max_numberOfCoins 这里多判断一次保证投币数超过5时 不执行投币操作.
+             * 最后一道安全判断，保证即使前面的判断逻辑错了，也不至于发生投币事故.
+             */
+            while (needCoins > 0 && needCoins <= maxNumberOfCoins) {
+                String bvid;
+                if (coinAddPriority == 1 && addCoinOperateCount < 7) {
+                    bvid = bilibiliRuntime.getVideoId.getFollowUpRandomVideoBvid();
+                } else {
+                    bvid = bilibiliRuntime.getVideoId.getRegionRankingVideoBvid();
+                }
+
+                addCoinOperateCount++;
+                boolean flag = coinAdd(bvid, 1, ConfigLoader.helperConfig.getTaskConfig().getSelectLike(),log);
+                if (flag) {
+                    needCoins--;
+                    new SleepTime().sleepDefault();
+                }
+                if (addCoinOperateCount > 15) {
+                    log.pushln("尝试投币/投币失败次数太多");
+                    break;
+                }
             }
-        }
-        log.pushln("投币任务完成后余额为: %s", OftenApi.getCoinBalance());
-        return true;
+            log.pushln("投币任务完成后余额为: %s", OftenApi.getCoinBalance());
+            return true;
+        });
     }
 
     /**
@@ -126,7 +126,7 @@ public class CoinAdd implements Task {
      * @param selectLike 是否同时点赞 1是
      * @return 是否投币成功
      */
-    private boolean coinAdd(String bvid, int multiply, int selectLike) {
+    private boolean coinAdd(String bvid, int multiply, int selectLike, BilibiliRuntime.Log log) {
         String videoTitle = OftenApi.getVideoTitle(bvid);
         //判断曾经是否对此av投币过
         if (isCoinAdded(bvid)) {
@@ -140,7 +140,7 @@ public class CoinAdd implements Task {
                     + "&cross_domain=" + "true"
                     + "&csrf=" + ConfigLoader.helperConfig.getBiliVerify().getBiliJct();
 
-            new VideoWatch().watchVideo(bvid);
+            new VideoWatch().watchVideo(bvid,log);
             JsonObject jsonObject = HttpUtils.doPost(ApiList.COIN_ADD, requestBody, headers);
             if (jsonObject.get(STATUS_CODE_STR).getAsInt() == 0) {
                 log.pushln("为 " + videoTitle + " 投币成功");
